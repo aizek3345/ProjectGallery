@@ -1,30 +1,30 @@
-const uuid = require('uuid')
-const path = require('path')
+const {Project} = require('../models/models')
 
-class projectController {
-    async create(req, res) {
-        try{
-            const { title, description } = req.body
-            const {img} = req.files
-            let fileName = uuid.v4() + '.jpg'
-            img.mv(path.resolve(__dirname, '..', 'static', fileName))
+class ProjectController {
+  async create(req, res) {
+    const response = await Project.create(req.body);
+    return res.json(response)
+  }
 
-            const project = await Project.create({title, description, img: fileName})
-            
-            return res.json(project)
-        }
-        catch (e) {
-            console.log(e)
-        }
+  async update(req, res) {
+    const { id } = req.params;
+    const response = await Project.update(req.body, { where: { id } });
+    return res.json(response);
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+    const project = await Project.findOne({ where: { id } });
+    if (!project) {
+      return res.status(404).json({ message: 'Проект не найден!' });
     }
-
-    async getAll(req, res) {
-
-    }
-
-    async getOne(req, res) {
-
-    }
+    await Project.destroy({ where: { id } });
+    return res.json({ message: 'Проект успешно удален!' });
+  }
+  async getList(req, res) {
+    const response = await Project.findAll();
+    return res.json(response)
+  }
 }
 
-module.exports = new projectController()
+module.exports = new ProjectController();
